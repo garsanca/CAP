@@ -251,10 +251,11 @@ unsigned char* omp_mandelbrot(double x0, double y0, double x1, double y1,
   return output;
 }
 
-unsigned char* omp_mandelbrot_offloading(double x0, double y0, double x1, double y1,
+unsigned char* omp_mandelbrot_offloading(float x0, float y0, float x1, float y1,
                                    int width, int height, int max_depth) {
-  double xstep = (x1 - x0) / width;
-  double ystep = (y1 - y0) / height;
+
+  float xstep = (x1 - x0) / width;
+  float ystep = (y1 - y0) / height;
   unsigned char* output = static_cast<unsigned char*>(
       _mm_malloc(width * height * sizeof(unsigned char), 64));
 
@@ -263,33 +264,33 @@ unsigned char* omp_mandelbrot_offloading(double x0, double y0, double x1, double
 // samples
 #pragma omp target teams distribute \
   parallel for simd collapse(2) \
-  map(from:output[0:height*width]) map (to:height,width,xstep,ystep,max_depth)
+  map(from:output[0:height*width])
   for (int j = 0; j < height; ++j) {
     for (int i = 0; i < width; ++i) {
-      double z_real = x0 + i * xstep;
-      double z_imaginary = y0 + j * ystep;
-      double c_real = z_real;
-      double c_imaginary = z_imaginary;
+      float z_real = x0 + i * xstep;
+      float z_imaginary = y0 + j * ystep;
+      float c_real = z_real;
+      float c_imaginary = z_imaginary;
 
       // depth should be an int, but the vectorizer will not vectorize,
-      // complaining about mixed data types switching it to double is worth the
+      // complaining about mixed data types switching it to float is worth the
       // small cost in performance to let the vectorizer work
-      double depth = 0;
+      float depth = 0.0f;
       // Figures out how many recurrences are required before divergence, up to
       // max_depth
       while (depth < max_depth) {
         if (z_real * z_real + z_imaginary * z_imaginary > 4.0) {
           break;  // Escape from a circle of radius 2
         }
-        double temp_real = z_real * z_real - z_imaginary * z_imaginary;
-        double temp_imaginary = 2.0 * z_real * z_imaginary;
+        float temp_real = z_real * z_real - z_imaginary * z_imaginary;
+        float temp_imaginary = 2.0f * z_real * z_imaginary;
         z_real = c_real + temp_real;
         z_imaginary = c_imaginary + temp_imaginary;
 
         ++depth;
       }
       output[j * width + i] = static_cast<unsigned char>(
-          static_cast<double>(depth) / max_depth * 255);
+          static_cast<float>(depth) / max_depth * 255);
     }
   }
   return output;

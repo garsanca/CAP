@@ -27,6 +27,21 @@ user@system:~$ icx -fiopenmp -fopenmp-targets=spir64 source.c
 user@system:~$ ifx -fiopenmp -fopenmp-targets=spir64 source.f90
 ```
 
+## OpenMP (NVIDIA)
+* Soportado en la gráficas de [NVIDIA con el SDK](https://docs.nvidia.com/hpc-sdk//index.html)
+* Uso del compilador NVC++ con soporte OpenMP offloading
+    * Activación de OpenMP con el flag ```-mp=gpu``` que a su vez tiene soporte **offloading**
+
+```bash
+user@system:~$ nvc++ -o simpleNVC simple.cpp  -mp=gpu
+user@system:~$ nsys nvprof ./simpleNVC 
+....
+ Time (%)  Total Time (ns)  Instances  Avg (ns)  Med (ns)  Min (ns)  Max (ns)  StdDev (ns)     GridXYZ         BlockXYZ              Name         
+ --------  ---------------  ---------  --------  --------  --------  --------  -----------  --------------  --------------  ----------------------
+    100,0           33.024          1  33.024,0  33.024,0    33.024    33.024          0,0    30    1    1  1024    1    1  nvkernel_main_F21L22_2
+...
+```
+
 
 ## Ejemplo HelloWorld
 * El primer ejemplo [simple.cpp](Hello_World/simple.cpp) en la carpeta [HelloWorld](Hello_world) inicializa en el host un array ```data```
@@ -164,13 +179,13 @@ Args:
         * disabled: región *target* en  CPU
         * default: región *target* en GPU (si hubiese), sino en CPU
 * Selección de Plugin/Driver
-    * ```LIBOMPTARGET_PLUGIN= [OPENCL | LEVEL0 ]```
+    * ```LIBOMPTARGET_PLUGIN= [OPENCL | LEVEL0]```
     * ```LIBOMPTARGET_DEVICETYPE= gpu | cpu```
 * Perfilado de ejecución en GPU
     * ```LIBOMPTARGET_PLUGIN_PROFILE=T```
 * Depuración
     * ```LIBOMPTARGET_DEBUG= [1 | 2]``` 
-    * Más [információn en el runtime del LLVM](https://openmp.llvm.org//design/Runtimes.html)
+    * Más [información en el runtime del LLVM](https://openmp.llvm.org//design/Runtimes.html)
 
 
 
@@ -205,9 +220,9 @@ Args:
     for (i = 0; i < P; i++) {
       for (j = 0; j < P; j++) {
         for (k = 0; k < P; k++) {
-          double ur = 0.;
-          double us = 0.;
-          double ut = 0.;
+          float ur = 0.;
+          float us = 0.;
+          float ut = 0.;
 
           for (int t=0 ; t < TIMES; t++)
             for (l = 0; l < P; l++) {
@@ -225,7 +240,7 @@ Args:
 ```
 
 * Evaluación de ejecución con variable entorno ```LIBOMPTARGET_DEBUG=1```
-    * SIMD: 8 
+    * SIMD: 16 
     * Número de teams: {4, 1, 1}
 * Sin las clausula *[collapse](Best-practices/test_no_collapse.cpp)*, las iteraciones del bucle=4 porque *BLOCKS=4*
 
@@ -235,74 +250,78 @@ user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
 Libomptarget --> Launching target execution __omp_offloading_10303_4e5bac__Z4main_l54 with pointer 0x00000000025a94a8 (index=1).
 ...
-Target OPENCL RTL --> Assumed kernel SIMD width is 8
-Target OPENCL RTL --> Preferred group size is multiple of 8
-Target OPENCL RTL --> Loop 0: lower bound = 0, upper bound = 3, Stride = 1
-Target OPENCL RTL --> Team sizes = {1, 1, 1}
-Target OPENCL RTL --> Number of teams = {4, 1, 1}
+Libomptarget --> Launching target execution __omp_offloading_809_3a0982__Z4main_l54 with pointer 0x00000000026c83c8 (index=1).
+Target LEVEL0 RTL --> Executing a kernel 0x00000000026c83c8...
+Target LEVEL0 RTL --> Assumed kernel SIMD width is 16
+Target LEVEL0 RTL --> Preferred team size is multiple of 32
+Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 3, Stride = 1
+Target LEVEL0 RTL --> Team sizes = {1, 1, 1}
+Target LEVEL0 RTL --> Number of teams = {4, 1, 1}
 ...
 ```
 
 * Clausula *[collapse(2)](Best-practices/test_collapse2.cpp)*, las iteraciones del bucle=8 porque BLOCKS\*P = 4\*8 = 32
-    * SIMD: 8 
-    * Team sizes:{4,1,1} y Número de teams: {2,4,1} luego **Número total teams: {8,4,1}=32**
+    * SIMD: 16
+    * Team sizes:{2,1,1} y Número de teams: {4,4,1} luego **Número total teams: {8,4,1}=32**
 
 ```bash
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_collapse2.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
-Libomptarget --> Launching target execution __omp_offloading_10303_4e5bac__Z4main_l54 with pointer 0x000000000171b4a8 (index=1).
-Libomptarget --> Manifesting used target pointers:
-Target OPENCL RTL --> Assumed kernel SIMD width is 8
-Target OPENCL RTL --> Preferred group size is multiple of 8
-Target OPENCL RTL --> Loop 0: lower bound = 0, upper bound = 7, Stride = 1
-Target OPENCL RTL --> Loop 1: lower bound = 0, upper bound = 3, Stride = 1
-Target OPENCL RTL --> Team sizes = {4, 1, 1}
-Target OPENCL RTL --> Number of teams = {2, 4, 1}
+Libomptarget --> Launching target execution __omp_offloading_809_3a0981__Z4main_l54 with pointer 0x000000000281c548 (index=1).
+Target LEVEL0 RTL --> Executing a kernel 0x000000000281c548...
+Target LEVEL0 RTL --> Assumed kernel SIMD width is 16
+Target LEVEL0 RTL --> Preferred team size is multiple of 32
+Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 7, Stride = 1
+Target LEVEL0 RTL --> Loop 1: lower bound = 0, upper bound = 3, Stride = 1
+Target LEVEL0 RTL --> Team sizes = {2, 1, 1}
+Target LEVEL0 RTL --> Number of teams = {4, 4, 1}
 ...
 ```
 
 * Clausula *[collapse(3)](Best-practices/test_collapse3.cpp)*, las iteraciones del bucle=8 porque BLOCKS\*P\*P = 4\*8\*8 = 256
-    * SIMD: 8 
+    * SIMD: 16
     * Team sizes:{8,1,1} y Número de teams: {1,8,4} luego **Número total teams: {8,8,4}=256**
 
 ```bash
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_collapse2.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
-Target OPENCL RTL --> Assumed kernel SIMD width is 8
-Target OPENCL RTL --> Preferred group size is multiple of 8
-Target OPENCL RTL --> Loop 0: lower bound = 0, upper bound = 7, Stride = 1
-Target OPENCL RTL --> Loop 1: lower bound = 0, upper bound = 7, Stride = 1
-Target OPENCL RTL --> Loop 2: lower bound = 0, upper bound = 3, Stride = 1
-Target OPENCL RTL --> Team sizes = {8, 1, 1}
-Target OPENCL RTL --> Number of teams = {1, 8, 4}
+Libomptarget --> Launching target execution __omp_offloading_809_3a0974__Z4main_l54 with pointer 0x00000000019fa528 (index=1).
+Target LEVEL0 RTL --> Executing a kernel 0x00000000019fa528...
+Target LEVEL0 RTL --> Assumed kernel SIMD width is 16
+Target LEVEL0 RTL --> Preferred team size is multiple of 32
+Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 7, Stride = 1
+Target LEVEL0 RTL --> Loop 1: lower bound = 0, upper bound = 7, Stride = 1
+Target LEVEL0 RTL --> Loop 2: lower bound = 0, upper bound = 3, Stride = 1
+Target LEVEL0 RTL --> Team sizes = {8, 1, 1}
+Target LEVEL0 RTL --> Number of teams = {1, 8, 4}
 ...
 ```
 
 * Clausula *[collapse(4)](Best-practices/test_collapse4.cpp)*, las iteraciones del bucle=8 porque BLOCKS\*P\*P\*P = 4\*8\*8\*8 = 2048
     * SIMD: 8 
-    * Team sizes:{8,1,1} y Número de teams: {256,1,1} luego **Número total teams: {2048,1,1}=2048**
+    * Team sizes:{32,1,1} y Número de teams: {64,1,1} luego **Número total teams: {2048,1,1}=2048**
 
 ```bash
-user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_collapse2.cpp
+user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_collapse4.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
-Libomptarget --> Launching target execution __omp_offloading_10303_4e5bac__Z4main_l54 with pointer 0x00000000015cb4a8 (index=1).
-Libomptarget --> Manifesting used target pointers:
-Target OPENCL RTL --> Assumed kernel SIMD width is 8
-Target OPENCL RTL --> Preferred group size is multiple of 8
-Target OPENCL RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
-Target OPENCL RTL --> Team sizes = {8, 1, 1}
-Target OPENCL RTL --> Number of teams = {256, 1, 1}
+Libomptarget --> Launching target execution __omp_offloading_809_3a09b9__Z4main_l54 with pointer 0x0000000001bbe168 (index=1).
+Target LEVEL0 RTL --> Executing a kernel 0x0000000001bbe168...
+Target LEVEL0 RTL --> Assumed kernel SIMD width is 16
+Target LEVEL0 RTL --> Preferred team size is multiple of 32
+Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
+Target LEVEL0 RTL --> Team sizes = {32, 1, 1}
+Target LEVEL0 RTL --> Number of teams = {64, 1, 1}
 ...
 ```
 
 * Resumen uso mejor de recursos de GPU: 
-    * time sin-collapse = 2.134297 s.
-    * time collapse(2)  = 0.271104 s.
-    * time collapse(3)  = 0.016485 s.
-    * time collapse(4)  = 0.010648 s.
+    * time sin-collapse = 0.256604 s.
+    * time collapse(2)  = 0.034757 s.
+    * time collapse(3)  = 0.004505 s.
+    * time collapse(4)  = 0.002429 s.
 
 
 ### Minimización transferencias CPU-GPU
@@ -356,21 +375,21 @@ Target OPENCL RTL --> Number of teams = {256, 1, 1}
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_no_target_enter_exit_data.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
-Libomptarget --> Launching target execution __omp_offloading_10303_4e1c07__Z4main_l47 with pointer 0x00000000020eb1a8 (index=1).
-Libomptarget --> Manifesting used target pointers:
-Target OPENCL RTL --> Assumed kernel SIMD width is 16
-Target OPENCL RTL --> Preferred group size is multiple of 16
-Target OPENCL RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
-Target OPENCL RTL --> Team sizes = {16, 1, 1}
-Target OPENCL RTL --> Number of teams = {128, 1, 1}
+Libomptarget --> Launching target execution __omp_offloading_809_3a09b9__Z4main_l50 with pointer 0x00000000015df558 (index=1).
+Target LEVEL0 RTL --> Executing a kernel 0x00000000015df558...
+Target LEVEL0 RTL --> Assumed kernel SIMD width is 32
+Target LEVEL0 RTL --> Preferred team size is multiple of 64
+Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
+Target LEVEL0 RTL --> Team sizes = {64, 1, 1}
+Target LEVEL0 RTL --> Number of teams = {32, 1, 1}
 ...
-Libomptarget --> Launching target execution __omp_offloading_10303_4e1c07__Z4main_l71 with pointer 0x00000000020eb1b0 (index=2).
-Libomptarget --> Manifesting used target pointers:
-Target OPENCL RTL --> Assumed kernel SIMD width is 16
-Target OPENCL RTL --> Preferred group size is multiple of 16
-Target OPENCL RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
-Target OPENCL RTL --> Team sizes = {16, 1, 1}
-Target OPENCL RTL --> Number of teams = {128, 1, 1}
+Libomptarget --> Launching target execution __omp_offloading_809_3a09b9__Z4main_l74 with pointer 0x00000000015df560 (index=2).
+Target LEVEL0 RTL --> Executing a kernel 0x00000000015df560...
+Target LEVEL0 RTL --> Assumed kernel SIMD width is 32
+Target LEVEL0 RTL --> Preferred team size is multiple of 64
+Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
+Target LEVEL0 RTL --> Team sizes = {64, 1, 1}
+Target LEVEL0 RTL --> Number of teams = {32, 1, 1}
 ...
 ```
 
@@ -378,24 +397,22 @@ Target OPENCL RTL --> Number of teams = {128, 1, 1}
     * Filtrar la salida por "Libomptarget --> Moving"
 * Recordando las transferencias para los kernels:
     * kernel\#1: ```map(to: u[0:SIZE], dx[0:P * P]) map(from: w[0:SIZE])```
-        * double u[SIZE]=$8B*BLOCKS*P*P*P=8*4*8*8*8=16384$
-        * double dx[$P*P$]=$8*8*8=512$
-        * double w[SIZE]=$16384$
+        * float u[SIZE]=$8B*BLOCKS*P*P*P=8*4*8*8*8=16384$
+        * float dx[$P*P$]=$8*8*8=512$
+        * float w[SIZE]=$16384$
     * kernel\#2: ```    map(to: u[0:SIZE], dx[0:P * P]) map(tofrom: w[0:SIZE])```
-        * double u[SIZE]=$16384$
-        * double dx[$P*P$]=$512$
-        * double w[SIZE]=$16384$
+        * float u[SIZE]=$8192$
+        * float dx[$P*P$]=$256$
+        * float w[SIZE]=$8192$
         
 ```bash
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out &> test_no_target_enter_exit_data.debug
 user@system:~$ grep "Libomptarget --> Moving" test_no_target_enter_exit_data.debug 
-Libomptarget --> Moving 512 bytes (hst:0x00007ffcc6d972a0) -> (tgt:0xffffd556aa7e0000)
-Libomptarget --> Moving 16384 bytes (hst:0x00007ffcc6d932a0) -> (tgt:0xffffd556aa7d0000)
-Libomptarget --> Moving 16384 bytes (tgt:0xffffd556aa7c0000) -> (hst:0x00007ffcc6d8f2a0)
-Libomptarget --> Moving 512 bytes (hst:0x00007ffcc6d972a0) -> (tgt:0xffffd556aa7e0000)
-Libomptarget --> Moving 16384 bytes (hst:0x00007ffcc6d932a0) -> (tgt:0xffffd556aa7d0000)
-Libomptarget --> Moving 16384 bytes (hst:0x00007ffcc6d8f2a0) -> (tgt:0xffffd556aa7c0000)
-Libomptarget --> Moving 16384 bytes (tgt:0xffffd556aa7c0000) -> (hst:0x00007ffcc6d8f2a0)
+Libomptarget --> Moving 8192 bytes (hst:0x00007ffe8141b470) -> (tgt:0x000000000231b000)
+Libomptarget --> Moving 256 bytes (hst:0x00007ffe8141f470) -> (tgt:0x0000000001f3e000)
+Libomptarget --> Moving 8192 bytes (tgt:0x000000000231d000) -> (hst:0x00007ffe8141d470)
+Libomptarget --> Moving 8192 bytes (hst:0x00007ffe8141d470) -> (tgt:0x000000000231d000)
+Libomptarget --> Moving 8192 bytes (tgt:0x000000000231d000) -> (hst:0x00007ffe8141d470)
 ```
 
 * Pero **¿hace falta en el kernel\#2 enviar 'u', 'dx' y 'w'?**
@@ -403,8 +420,7 @@ Libomptarget --> Moving 16384 bytes (tgt:0xffffd556aa7c0000) -> (hst:0x00007ffcc
 
 ```cpp
 ...
-  /* map data to device. alloc for w avoids map(tofrom: w[0:SIZE])
-     on target by default. */
+  /* map data to device. alloc for w avoids map(tofrom: w[0:SIZE]) on target by default. */
   #pragma omp target enter data map(to: u[0:SIZE], dx[0:P * P]) \
     map(alloc: w[0:SIZE])
 
@@ -430,8 +446,8 @@ Libomptarget --> Moving 16384 bytes (tgt:0xffffd556aa7c0000) -> (hst:0x00007ffdc
 ```
 
 * En resumen el eficiente de transferencias memorias CPU-GPU muestra que:
-    * time sin enter/exit data: 0.002407 s.
-    * time con enter/exit data: 0.001089 s.
+    * time sin enter/exit data: 0.000249 s.
+    * time con enter/exit data: 0.000153 s.
 
 
 ## Variables escalares por copia
@@ -474,7 +490,7 @@ Libomptarget --> Moving 16384 bytes (tgt:0xffffd556aa7c0000) -> (hst:0x00007ffdc
 ```
 
 * Se observan los tiempos de ejeución:
-    * Tiempo del kernel: 0.001143 s. vs 0.000871 s. 
+    * Tiempo del kernel: 0.000117 s. vs 0.000097 s. 
 
 ## Jacobi
 * A continuación se muestra el código del resolutor de Jacobi disponible en el [repositorio](Jacobi/jacobi.c) cuyo [Makefile](Jacobi/Makefile) genera dos ejecutables: **jacobi.host.exe** (versión secuencial) y **jacobi.omp.exe** (versión compilada con OpenMP-target)

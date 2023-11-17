@@ -53,7 +53,8 @@ unsigned char* parallel_mandelbrot(double x0, double y0, double x1, double y1,
 unsigned char* omp_mandelbrot(double x0, double y0, double x1, double y1,
                               int width, int height, int max_depth);
 
-unsigned char* omp_mandelbrot_offloading(double x0, double y0, double x1, double y1,
+// float because iGPU not support double
+unsigned char* omp_mandelbrot_offloading(float x0, float y0, float x1, float y1,
                               int width, int height, int max_depth);
 
 #endif  // MANDELBROT_H

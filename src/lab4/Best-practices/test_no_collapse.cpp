@@ -26,8 +26,8 @@
 #define IDX4(b, i, j, k) (b * P * P * P + i * P * P + j * P + k)
 
 int main(void) {
-  double w[SIZE];            /* output */
-  double u[SIZE], dx[P * P]; /* input */
+  float w[SIZE];            /* output */
+  float u[SIZE], dx[P * P]; /* input */
   int b, i, j, k, l;         /* loop counters */
   double start, end;         /* timers */
 
@@ -57,9 +57,9 @@ int main(void) {
     for (i = 0; i < P; i++) {
       for (j = 0; j < P; j++) {
         for (k = 0; k < P; k++) {
-          double ur = 0.;
-          double us = 0.;
-          double ut = 0.;
+          float ur = 0.;
+          float us = 0.;
+          float ut = 0.;
 
           for (int t=0 ; t< TIMES; t++)
             for (l = 0; l < P; l++) {
@@ -78,8 +78,15 @@ int main(void) {
 
   #pragma omp target exit data map(from: w[0:SIZE])
 
+  float red = 0.0; 
+  for (b = 0; b < BLOCKS; b++) 
+    for (i = 0; i < P; i++) 
+      for (j = 0; j < P; j++) 
+        for (k = 0; k < P; k++) 
+  		red += w[IDX4(b, i, j, k)];
+
   /* print result */
-  printf("no-collapse-clause: w[0]=%lf time=%lf\n", w[0], end - start);
+  printf("no-collapse-clause: w[0]=%lf time=%lf red=%f\n", w[0], end - start, red);
 
   return 0;
 }

@@ -22,9 +22,8 @@
 #define IDX4(b, i, j, k) (b * P * P * P + i * P * P + j * P + k)
 
 int main(void) {
-  double w[SIZE];            /* output */
-  double u[SIZE], dx[P * P]; /* input */
-  double s1, s2, s3;         /* scalars */
+  float w[SIZE];            /* output */
+  float u[SIZE], dx[P * P]; /* input */
   int b, i, j, k, l;         /* loop counters */
   double start, end;         /* timers */
 
@@ -43,9 +42,9 @@ int main(void) {
     dx[i] = scaled_rand();
 
   /* initialize scalars */
-  s1 = u[SIZE / 2];
-  s2 = scaled_rand();
-  s3 = 0.145;
+  float s1 = u[SIZE / 2];
+  float s2 = scaled_rand();
+  float s3 = 0.145;
 
   /* map data to device */
   #pragma omp target enter data map(to: u[0:SIZE], dx[0:P * P])
@@ -54,15 +53,15 @@ int main(void) {
 
   /* offload the kernel with collapse clause */
   #pragma omp target teams distribute parallel for collapse(4) \
-    map(to: s1, s2, s3) private(b, i, j, k, l)
-//    firstprivate(s1, s2, s3) private(b, i, j, k, l)
+    map(to: s1, s2, s3)
+//    firstprivate(s1, s2, s3)
   for (b = 0; b < BLOCKS; b++) {
     for (i = 0; i < P; i++) {
       for (j = 0; j < P; j++) {
         for (k = 0; k < P; k++) {
-          double ur = 0.;
-          double us = 0.;
-          double ut = 0.;
+          float ur = 0.;
+          float us = 0.;
+          float ut = 0.;
 
           for (l = 0; l < P; l++) {
             ur += dx[IDX2(i, l)] * u[IDX4(b, l, j, k)] + s1;
@@ -80,8 +79,17 @@ int main(void) {
 
   #pragma omp target exit data map(from: w[0:SIZE])
 
+  end = omp_get_wtime();
+
+  float red = 0.0; 
+  for (b = 0; b < BLOCKS; b++) 
+    for (i = 0; i < P; i++) 
+      for (j = 0; j < P; j++) 
+        for (k = 0; k < P; k++) 
+  		red += w[IDX4(b, i, j, k)];
+
   /* print result */
-  printf("collapse-clause: w[0]=%lf time=%lf\n", w[0], end - start);
+  printf("collapse-clause: w[0]=%lf time=%lf red=%f\n", w[0], end - start, red);
 
   return 0;
 }

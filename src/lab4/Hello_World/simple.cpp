@@ -8,8 +8,9 @@
 #include <iostream>
 
 //Compile: icpx -fiopenmp -fopenmp-targets=spir64 simple.cpp -o simple
+//Compile: nvc++ -o simpleNVC simple.cpp  -mp=gpu
 
-constexpr int N = 16;
+constexpr int N = 2048;
 int main() {
   int is_cpu = true;
   int *data = static_cast<int *>(malloc(N * sizeof(int)));
@@ -29,7 +30,7 @@ int main() {
 
   // Print Output
   std::cout << "Running on " << (is_cpu ? "CPU" : "GPU") << "\n";
-  for (int i = 0; i < N; i++) std::cout << data[i] << "\n";
+//  for (int i = 0; i < N; i++) std::cout << data[i] << "\n";
 
   free(data);
   return 0;

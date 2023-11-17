@@ -60,8 +60,8 @@ int main(int argc, char* argv[]) {
   double y1 = 0.875;
 
   // Modifiable parameters:
-  int height = 1024;
-  int width = 2048;  // Width should be a multiple of 8
+  int height = 32768;
+  int width = 32768;  // Width should be a multiple of 8
   int max_depth = 100;
 
   assert(width % 8 == 0);
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
           "would like to use.\n");
       printf(
           "[0] all tests\n[1] serial/scalar\n[2] OpenMP SIMD\n[3] OpenMP "
-          "Parallel\n[4] OpenMP Both\n  > ");
+          "Parallel\n[4] OpenMP Both\n[5] OpenMP offloading \n > ");
       return 0;
     } else {
       option = atoi(argv[1]);
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
         "like to use.\n");
     printf(
         "[0] all tests\n[1] serial/scalar\n[2] OpenMP SIMD\n[3] OpenMP "
-        "Parallel\n[4] OpenMP Both\n  > ");
+          "Parallel\n[4] OpenMP Both\n[5] OpenMP offloading \n > ");
     scanf("%i", &option);
   }
 #endif  // !PERF_NUM
@@ -252,7 +252,7 @@ int main(int argc, char* argv[]) {
   case 5: {
     printf("\nStarting OMP Mandelbrot offloading...\n");
     timer.start();
-    output = omp_mandelbrot_offloading(x0, y0, x1, y1, width, height, max_depth);
+    output = omp_mandelbrot_offloading((float)x0, (float)y0, (float)x1, (float)y1, width, height, max_depth);
     timer.stop();
     printf("Calculation finished. Processing time was %.0fms\n",
            timer.get_time() * 1000.0);

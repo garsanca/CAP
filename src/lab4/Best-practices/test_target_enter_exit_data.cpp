@@ -22,8 +22,8 @@
 #define IDX4(b, i, j, k) (b * P * P * P + i * P * P + j * P + k)
 
 int main(void) {
-  double w[SIZE];            /* output */
-  double u[SIZE], dx[P * P]; /* input */
+  float w[SIZE];            /* output */
+  float u[SIZE], dx[P * P]; /* input */
   int b, i, j, k, l;         /* loop counters */
   double start, end;         /* timers */
 
@@ -41,6 +41,9 @@ int main(void) {
   for (int i = 0; i < P * P; i++)
     dx[i] = scaled_rand();
 
+  /* map data to device */
+  #pragma omp target enter data map(to: u[0:SIZE], dx[0:P * P])
+
   start = omp_get_wtime();
 
   /* map data to device. alloc for w avoids map(tofrom: w[0:SIZE])
@@ -55,9 +58,9 @@ int main(void) {
     for (i = 0; i < P; i++) {
       for (j = 0; j < P; j++) {
         for (k = 0; k < P; k++) {
-          double ur = 0.;
-          double us = 0.;
-          double ut = 0.;
+          float ur = 0.;
+          float us = 0.;
+          float ut = 0.;
 
           for (l = 0; l < P; l++) {
             ur += dx[IDX2(i, l)] * u[IDX4(b, l, j, k)];
@@ -78,9 +81,9 @@ int main(void) {
     for (i = 0; i < P; i++) {
       for (j = 0; j < P; j++) {
         for (k = 0; k < P; k++) {
-          double ur = b + i + j - k;
-          double us = b + i + j - k;
-          double ut = b + i + j - k;
+          float ur = b + i + j - k;
+          float us = b + i + j - k;
+          float ut = b + i + j - k;
 
           for (l = 0; l < P; l++) {
             ur += dx[IDX2(i, l)] * u[IDX4(b, l, j, k)];
@@ -98,8 +101,15 @@ int main(void) {
 
   end = omp_get_wtime();
 
+  float red = 0.0; 
+  for (b = 0; b < BLOCKS; b++) 
+    for (i = 0; i < P; i++) 
+      for (j = 0; j < P; j++) 
+        for (k = 0; k < P; k++) 
+  		red += w[IDX4(b, i, j, k)];
+
   /* print result */
-  printf("target region: w[0]=%lf time=%lf\n", w[0], end - start);
+  printf("target region: w[0]=%lf time=%lf red=%f\n", w[0], end - start, red);
 
   return 0;
 }
