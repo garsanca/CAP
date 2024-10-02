@@ -3,9 +3,9 @@
 ## Antes de nada 
 * ¿Cómo saber el equipo disponible?
     * Modelo del procesador
-    * Número de cores
+    * Número de cores: 8 Performance-cores y 4 Efficient-cores
     * Vectorización: *sse*, *avx*...
-    * Especificaciones a consultar en la página de [Intel](https://ark.intel.com/content/www/es/es/ark.html\#@PanelLabel122139)
+    * Especificaciones a consultar en la página de [Intel](https://www.intel.com/content/www/us/en/products/sku/134591/intel-core-i712700-processor-25m-cache-up-to-4-90-ghz/specifications.html?wapkw=12700)
 
 ```console
 user@lab:~ $  more /proc/cpuinfo 
@@ -21,13 +21,25 @@ flags		: ... avx ... avx2 ...
 ....
 ```
 
+* Uso de P-cores o E-cores con `taskset`para fijar el core donde ejecutar
+     * 0-15 usa P-cores
+     * 16-19 usa E-cores
+
+```sh
+user@lab:~ $  taskset --cpu-list 0 python3 -c "import numpy as np, time; N=5000; A=np.random.rand(N, N); B=np.random.rand(N, N); start=time.time(); result=np.dot(A, B); end=time.time(); print(f'Execution time:', end-start, 'seconds');"
+Execution time: 2.976552724838257 seconds
+user@lab:~ $  taskset --cpu-list 16 python3 -c "import numpy as np, time; N=5000; A=np.random.rand(N, N); B=np.random.rand(N, N); start=time.time(); result=np.dot(A, B); end=time.time(); print(f'Execution time:', end-start, 'seconds');"
+Execution time: 8.270392179489136 seconds
+```
+
+
 ## Opciones de Compilación
 * Opciones del compilador para llevar a cabo optimizaciones
 
 ## Autovectorización
-* La opción **-O2** del compilador de [Intel® oneAPI DPC++/C++ Compiler](https://www.intel.com/content/www/us/en/docs/dpcpp-cpp-compiler/developer-guide-reference/2023-0/overview.html) habilita al autovectorizador
+* La opción **-O2** del compilador de [Intel® oneAPI DPC++/C++ Compiler](https://www.intel.com/content/www/us/en/docs/dpcpp-cpp-compiler/developer-guide-reference/2024-2/overview.html) habilita al autovectorizador: [O2](https://www.intel.com/content/www/us/en/docs/dpcpp-cpp-compiler/developer-guide-reference/2024-2/o-001.html) "Vectorization is enabled at O2 and higher levels."
 
-```console
+```sh
 user@lab:~ $ icx -o fooO2 foo.c -O2 -qopt-report=2
 user@lab:~ $ more foo.optrpt 
 ....
@@ -88,7 +100,7 @@ void axpy(float *c, float *a, float *b, float cte, int n)
 # Ejemplos
 ## Opciones de compilación 
 * Especifica las [optimizaciones en compilación](https://software.intel.com/en-us/cpp-compiler-developer-guide-and-reference-o): -O[n]
-    * Por defecto el compilador utiliza **-O2**
+    * Por defecto el compilador[^1] utiliza **-O2**
 * El código de ejemplo está [disponible](CompilerOpt/foo.c)
 
 |   |   |
@@ -103,7 +115,7 @@ void axpy(float *c, float *a, float *b, float cte, int n)
 | **O3** | O2+ Opt. más agresiva: fusión de bucles, unroll                                       |
 |        | Adecuada para código basados en bucles y cómputo fp                                   |
 
-[^2]: \url{}
+[^1]: \url{https://www.intel.com/content/www/us/en/docs/dpcpp-cpp-compiler/developer-guide-reference/2024-2/o-001.html}
 
 ## Opciones de compilación
 * El código de ejemplo está [disponible](CompilerOpt/foo.c)
