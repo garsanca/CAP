@@ -30,7 +30,7 @@ void CalculateElectricPotential(
     float *z = chg.z;
     float *q = chg.q;
 
-#pragma omp simd simdlen(16) aligned(x, y, z, q:alignment) linear(x, y, z, q) reduction(+:phi)
+#pragma simd simdlen(8) aligned(x, y, z, q:alignment) linear(x, y, z, q) reduction(+:phi)
     for (int i=0; i<chg.m; i++)  {
         // Unit stride: (&chg.x[i+1] - &chg.x[i]) == sizeof(float)
         const float dx=x[i] - Rx;
