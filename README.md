@@ -15,6 +15,12 @@
 
 * Las instrucciones y códigos del [laboratorio 2](src/lab2/lab2.md)
 
+## Práctica 3 (Explotación paralelismo distribuido con MPI)
+* Explotación de paralelismo en sistemas de memoria distribuida
+
+![imagen](figures/paralel_threads_vs_processes.png)
+
+* Las instrucciones y códigos del [laboratorio 3](src/lab3/lab3.md)
 
 ## Práctica 4 (Explotación paralelismo heterogéneo con OpenMP)
 * Explotación de paralelismo heterogéneo tipo CPU-GPU mediante el paradigma de programación de OpenMP
