@@ -117,7 +117,6 @@ Hello world from processor system_name, rank 0 out of 2 processors
 ![Alt text](figures/pingpong.jpg)
 
 ```c
-
 void ping(int N) {
 	MPI_Status status;
 
@@ -175,6 +174,7 @@ int main( int argc, char *argv[] ) {
 	MPI_Finalize();
 	
 	return 0;
+```
 
 ## Cálculo de PI
 
@@ -235,13 +235,15 @@ $\pi \approx \sum_{i=0}^{N} F(x_i) \Delta x$
 La librería Intel® MPI permite controlar la información de depuración con la variable de entorno **I\_MPI\_DEBUG**
 
 ```bash
-user@lab:$  mpirun  -genv I_MPI_DEBUG=2 -n 2 ./testc 
--genv I_MPI_DEBUG=2 -n 2 testc[1] MPI startup(): Internal info: pinning initialization was done[0] MPI startup(): Internal info: pinning initialization was done...
+user@lab:$  mpirun  -genv I_MPI_DEBUG=2 -n 2 ./test
+[0] MPI startup(): Intel(R) MPI Library, Version 2021.14  Build 20240911 (id: b3fc682)
+[0] MPI startup(): Copyright (C) 2003-2024 Intel Corporation.  All rights reserved.
+...
 ```
 * También permite conocer el "tiempo" en el que se produce cada uno de los eventos
 
 ```bash
-user@lab:$ mpirun -genv I_MPI_DEBUG=2,time,norank -n 2 ./testc
+user@lab:$ mpirun -genv I_MPI_DEBUG=2,time,norank -n 2 ./test
 11:59:59 MPI startup(): Multi-threaded optimized library
 ```
 

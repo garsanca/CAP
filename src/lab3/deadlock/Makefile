@@ -1,5 +1,5 @@
 
-MPICC=mpiicc
+MPICC=mpiicx
 
 deadlock:
 	${MPICC} -o deadlock deadlock.c -g
