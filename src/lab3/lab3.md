@@ -474,7 +474,7 @@ static float diff(const float * current, const float * next) {
     * Genera report HTML con el comando ```aps-report```
 
 ```bash
-user@lab:$ mpirun -np 4 ./piparallel 100000
+user@lab:$ mpirun -np 4 aps ./piparallel 100000
 user@lab:$ aps-report aps_result_20241113_24bd0000-2035
 ```
 
