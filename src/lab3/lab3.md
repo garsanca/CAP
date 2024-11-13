@@ -448,3 +448,34 @@ static float diff(const float * current, const float * next) {
 
 ![Alt text](figures/grid_2D.png)
 
+# Perfilado
+## Intel APS-Application Performance Snapshot
+* Vista rápida de algunos aspectos importantes en las aplicaciones de cómputo intensivo
+* Más info en [guía de referencia](https://www.intel.com/content/www/us/en/docs/vtune-profiler/user-guide-application-snapshot-linux/2023-0/introducing-application-performance-snapshot.html)
+    * Uso de MPI o OpenMP
+    * Utilización de CPU
+    * Acceso de memoria eficientes
+    * Vectorización
+    * E/S
+    * Huella de la memoria
+
+## Intel APS-Application Performance Snapshot
+* Fácil y rápido (vista rápida)
+    * Haz un test en lo que tardas en preparer un café
+    * Toda la información de un vistazo
+* MPI + OpenMP + Memory + Floating Point
+    * Soporta implementaciones MPI comunes
+    * Intel® MPI, MPICH, OpenMPI y Cray MPI
+
+
+## Intel APS-Application Performance Snapshot
+* Para ejecutar con mpi:
+    * **mpirun -np 2 aps ./my_app my_app app_parameters**
+    * Genera report HTML con el comando ```aps-report```
+
+```bash
+user@lab:$ mpirun -np 4 ./piparallel 100000
+user@lab:$ aps-report aps_result_20241113_24bd0000-2035
+```
+
+![Alt text](https://www.intel.com/content/dam/docs/us/en/user-guide-application-snapshot-linux/2023-0/DC7D6BB3-174D-408C-B778-712EA61F3D9E-low.png)
