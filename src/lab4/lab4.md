@@ -240,7 +240,10 @@ Args:
 ```
 
 * Evaluación de ejecución con variable entorno ```LIBOMPTARGET_DEBUG=1```
-    * SIMD: 16 
+    * *EU SIMD width*: 8
+    * *Number of threads per EU*: 8
+    * *Number of EUs per subslice*: 16
+    * *Number of subslices per slice:* 4
     * Número de teams: {4, 1, 1}
 * Sin las clausula *[collapse](Best-practices/test_no_collapse.cpp)*, las iteraciones del bucle=4 porque *BLOCKS=4*
 
@@ -248,35 +251,33 @@ Args:
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_no_collapse.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
-Libomptarget --> Launching target execution __omp_offloading_10303_4e5bac__Z4main_l54 with pointer 0x00000000025a94a8 (index=1).
-...
-Libomptarget --> Launching target execution __omp_offloading_809_3a0982__Z4main_l54 with pointer 0x00000000026c83c8 (index=1).
-Target LEVEL0 RTL --> Executing a kernel 0x00000000026c83c8...
-Target LEVEL0 RTL --> Assumed kernel SIMD width is 16
-Target LEVEL0 RTL --> Preferred team size is multiple of 32
-Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 3, Stride = 1
-Target LEVEL0 RTL --> Team sizes = {1, 1, 1}
-Target LEVEL0 RTL --> Number of teams = {4, 1, 1}
+Target LEVEL_ZERO RTL --> Executing a kernel 0x000000000221c178...
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> Assumed kernel SIMD width is 32
+Target LEVEL_ZERO RTL --> Preferred team size is multiple of 64
+Target LEVEL_ZERO RTL --> Max number of teams is set to 1 (num_teams clause or no teams construct)
+Target LEVEL_ZERO RTL --> Team sizes = {64, 1, 1}
+Target LEVEL_ZERO RTL --> Number of teams = {1, 1, 1}
 ...
 ```
 
 * Clausula *[collapse(2)](Best-practices/test_collapse2.cpp)*, las iteraciones del bucle=8 porque BLOCKS\*P = 4\*8 = 32
     * SIMD: 16
-    * Team sizes:{2,1,1} y Número de teams: {4,4,1} luego **Número total teams: {8,4,1}=32**
+    * Team sizes:{1,1,1} y Número de teams: {8,4,1} luego **Número total teams: {8,4,1}=32**
 
 ```bash
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_collapse2.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
-Libomptarget --> Launching target execution __omp_offloading_809_3a0981__Z4main_l54 with pointer 0x000000000281c548 (index=1).
-Target LEVEL0 RTL --> Executing a kernel 0x000000000281c548...
-Target LEVEL0 RTL --> Assumed kernel SIMD width is 16
-Target LEVEL0 RTL --> Preferred team size is multiple of 32
-Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 7, Stride = 1
-Target LEVEL0 RTL --> Loop 1: lower bound = 0, upper bound = 3, Stride = 1
-Target LEVEL0 RTL --> Team sizes = {2, 1, 1}
-Target LEVEL0 RTL --> Number of teams = {4, 4, 1}
-...
+Target LEVEL_ZERO RTL --> Assumed kernel SIMD width is 16
+Target LEVEL_ZERO RTL --> Preferred team size is multiple of 32
+Target LEVEL_ZERO RTL --> Loop 0: lower bound = 0, upper bound = 7, Stride = 1
+Target LEVEL_ZERO RTL --> Loop 1: lower bound = 0, upper bound = 3, Stride = 1
+Target LEVEL_ZERO RTL --> Team sizes = {1, 1, 1}
+Target LEVEL_ZERO RTL --> Number of teams = {8, 4, 1}
 ```
 
 * Clausula *[collapse(3)](Best-practices/test_collapse3.cpp)*, las iteraciones del bucle=8 porque BLOCKS\*P\*P = 4\*8\*8 = 256
@@ -287,41 +288,47 @@ Target LEVEL0 RTL --> Number of teams = {4, 4, 1}
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_collapse2.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
-Libomptarget --> Launching target execution __omp_offloading_809_3a0974__Z4main_l54 with pointer 0x00000000019fa528 (index=1).
-Target LEVEL0 RTL --> Executing a kernel 0x00000000019fa528...
-Target LEVEL0 RTL --> Assumed kernel SIMD width is 16
-Target LEVEL0 RTL --> Preferred team size is multiple of 32
-Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 7, Stride = 1
-Target LEVEL0 RTL --> Loop 1: lower bound = 0, upper bound = 7, Stride = 1
-Target LEVEL0 RTL --> Loop 2: lower bound = 0, upper bound = 3, Stride = 1
-Target LEVEL0 RTL --> Team sizes = {8, 1, 1}
-Target LEVEL0 RTL --> Number of teams = {1, 8, 4}
+Target LEVEL_ZERO RTL --> Executing a kernel 0x0000000002fe9af8...
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> Assumed kernel SIMD width is 16
+Target LEVEL_ZERO RTL --> Preferred team size is multiple of 32
+Target LEVEL_ZERO RTL --> Loop 0: lower bound = 0, upper bound = 7, Stride = 1
+Target LEVEL_ZERO RTL --> Loop 1: lower bound = 0, upper bound = 7, Stride = 1
+Target LEVEL_ZERO RTL --> Loop 2: lower bound = 0, upper bound = 3, Stride = 1
+Target LEVEL_ZERO RTL --> Team sizes = {8, 1, 1}
+Target LEVEL_ZERO RTL --> Number of teams = {1, 8, 4}
 ...
 ```
 
 * Clausula *[collapse(4)](Best-practices/test_collapse4.cpp)*, las iteraciones del bucle=8 porque BLOCKS\*P\*P\*P = 4\*8\*8\*8 = 2048
-    * SIMD: 8 
+    * SIMD: 16 
     * Team sizes:{32,1,1} y Número de teams: {64,1,1} luego **Número total teams: {2048,1,1}=2048**
 
 ```bash
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_collapse4.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
-Libomptarget --> Launching target execution __omp_offloading_809_3a09b9__Z4main_l54 with pointer 0x0000000001bbe168 (index=1).
-Target LEVEL0 RTL --> Executing a kernel 0x0000000001bbe168...
-Target LEVEL0 RTL --> Assumed kernel SIMD width is 16
-Target LEVEL0 RTL --> Preferred team size is multiple of 32
-Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
-Target LEVEL0 RTL --> Team sizes = {32, 1, 1}
-Target LEVEL0 RTL --> Number of teams = {64, 1, 1}
+Target LEVEL_ZERO RTL --> Executing a kernel 0x00000000037ed458...
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> Assumed kernel SIMD width is 16
+Target LEVEL_ZERO RTL --> Preferred team size is multiple of 32
+Target LEVEL_ZERO RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
+Target LEVEL_ZERO RTL --> Team sizes = {32, 1, 1}
+Target LEVEL_ZERO RTL --> Number of teams = {64, 1, 1}
 ...
 ```
 
 * Resumen uso mejor de recursos de GPU: 
-    * time sin-collapse = 0.256604 s.
-    * time collapse(2)  = 0.034757 s.
-    * time collapse(3)  = 0.004505 s.
-    * time collapse(4)  = 0.002429 s.
+    * time sin-collapse = 0.196160 s.
+    * time collapse(2)  = 0.024447 s.
+    * time collapse(3)  = 0.003280 s.
+    * time collapse(4)  = 0.001072 s.
 
 
 ### Minimización transferencias CPU-GPU
@@ -369,27 +376,33 @@ Target LEVEL0 RTL --> Number of teams = {64, 1, 1}
 ```
 
 * Clausula *[collapse(4)](Best-practices/test_no_target_enter_exit_data.cpp)* para mejorar la "ocupación de GPU"
-* Kernels generados para las líneas **47** y **71** con el particionado Team sizes:{16,1,1} y Número de teams: {128,1,1}
+* Kernels generados para las líneas **47** y **71** con el particionado Team sizes:{64,1,1} y Número de teams: {32,1,1}
 
 ```bash
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_no_target_enter_exit_data.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out
 ...
-Libomptarget --> Launching target execution __omp_offloading_809_3a09b9__Z4main_l50 with pointer 0x00000000015df558 (index=1).
-Target LEVEL0 RTL --> Executing a kernel 0x00000000015df558...
-Target LEVEL0 RTL --> Assumed kernel SIMD width is 32
-Target LEVEL0 RTL --> Preferred team size is multiple of 64
-Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
-Target LEVEL0 RTL --> Team sizes = {64, 1, 1}
-Target LEVEL0 RTL --> Number of teams = {32, 1, 1}
+Target LEVEL_ZERO RTL --> Executing a kernel 0x0000000002cb56d8...
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> Assumed kernel SIMD width is 32
+Target LEVEL_ZERO RTL --> Preferred team size is multiple of 64
+Target LEVEL_ZERO RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
+Target LEVEL_ZERO RTL --> Team sizes = {64, 1, 1}
+Target LEVEL_ZERO RTL --> Number of teams = {32, 1, 1}
 ...
-Libomptarget --> Launching target execution __omp_offloading_809_3a09b9__Z4main_l74 with pointer 0x00000000015df560 (index=2).
-Target LEVEL0 RTL --> Executing a kernel 0x00000000015df560...
-Target LEVEL0 RTL --> Assumed kernel SIMD width is 32
-Target LEVEL0 RTL --> Preferred team size is multiple of 64
-Target LEVEL0 RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
-Target LEVEL0 RTL --> Team sizes = {64, 1, 1}
-Target LEVEL0 RTL --> Number of teams = {32, 1, 1}
+Target LEVEL_ZERO RTL --> Executing a kernel 0x0000000002cd5ef8...
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> omp_get_thread_limit() returned 2147483647
+Target LEVEL_ZERO RTL --> omp_get_max_teams() returned 0
+Target LEVEL_ZERO RTL --> Assumed kernel SIMD width is 32
+Target LEVEL_ZERO RTL --> Preferred team size is multiple of 64
+Target LEVEL_ZERO RTL --> Loop 0: lower bound = 0, upper bound = 2047, Stride = 1
+Target LEVEL_ZERO RTL --> Team sizes = {64, 1, 1}
+Target LEVEL_ZERO RTL --> Number of teams = {32, 1, 1}
 ...
 ```
 
@@ -407,12 +420,13 @@ Target LEVEL0 RTL --> Number of teams = {32, 1, 1}
         
 ```bash
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out &> test_no_target_enter_exit_data.debug
-user@system:~$ grep "Libomptarget --> Moving" test_no_target_enter_exit_data.debug 
-Libomptarget --> Moving 8192 bytes (hst:0x00007ffe8141b470) -> (tgt:0x000000000231b000)
-Libomptarget --> Moving 256 bytes (hst:0x00007ffe8141f470) -> (tgt:0x0000000001f3e000)
-Libomptarget --> Moving 8192 bytes (tgt:0x000000000231d000) -> (hst:0x00007ffe8141d470)
-Libomptarget --> Moving 8192 bytes (hst:0x00007ffe8141d470) -> (tgt:0x000000000231d000)
-Libomptarget --> Moving 8192 bytes (tgt:0x000000000231d000) -> (hst:0x00007ffe8141d470)
+user@system:~$ grep "omptarget --> Moving" test_no_target_enter_exit_data.debug 
+omptarget --> Moving 8192 bytes (hst:0x00007ffea8b9a1c0) -> (tgt:0x00007598cec50000)
+omptarget --> Moving 256 bytes (hst:0x00007ffea8b9e1c0) -> (tgt:0x00007598cc6d0000)
+omptarget --> Moving 8192 bytes (tgt:0x00007598cec52000) -> (hst:0x00007ffea8b9c1c0)
+omptarget --> Moving 8192 bytes (hst:0x00007ffea8b9c1c0) -> (tgt:0x00007598cec52000)
+omptarget --> Moving 8192 bytes (tgt:0x00007598cec52000) -> (hst:0x00007ffea8b9c1c0)
+
 ```
 
 * Pero **¿hace falta en el kernel\#2 enviar 'u', 'dx' y 'w'?**
@@ -439,10 +453,10 @@ Cuya ejecución se muestra:
 ```bash
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 test_target_enter_exit_data.cpp
 user@system:~$ OMP_TARGET_OFFLOAD=MANDATORY LIBOMPTARGET_DEBUG=1 ./a.out &> test_target_enter_exit_data.debug
-user@system:~$ grep "Libomptarget --> Moving" test_target_enter_exit_data.debug 
-Libomptarget --> Moving 16384 bytes (hst:0x00007ffdc04721b0) -> (tgt:0xffffd556aa7e0000)
-Libomptarget --> Moving 512 bytes (hst:0x00007ffdc04761b0) -> (tgt:0xffffd556aa7d0000)
-Libomptarget --> Moving 16384 bytes (tgt:0xffffd556aa7c0000) -> (hst:0x00007ffdc046e1b0)
+user@system:~$ grep "omptarget --> Moving" test_target_enter_exit_data.debug 
+omptarget --> Moving 8192 bytes (hst:0x00007ffe7cf6d9d0) -> (tgt:0x000073102c420000)
+omptarget --> Moving 256 bytes (hst:0x00007ffe7cf719d0) -> (tgt:0x0000731029910000)
+omptarget --> Moving 8192 bytes (tgt:0x000073102c422000) -> (hst:0x00007ffe7cf6f9d0)
 ```
 
 * En resumen el eficiente de transferencias memorias CPU-GPU muestra que:
