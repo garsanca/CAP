@@ -47,16 +47,33 @@ int main(){
 * Pudiendo compilar con ambos compiladores y generando el fichero de reportes
 
 ```sh
-user@lab:~ $ icc -o hello.icc hello.c -qopenmp -qopt-report
+user@lab:~ $ icx -o hello.icc hello.c -qopenmp -qopt-report
 user@lab:~ $ more hello.optrpt 
+Global optimization report for : main
+=================================================================
 
-...
-Begin optimization report for: main()
+Global optimization report for : main.extracted
+=================================================================
 
-    Report from: OpenMP optimizations [openmp]
+---- Begin Inlining Report ----
+Option Values:
+  inline-threshold: 225
+  inlinehint-threshold: 325
+  inlinecold-threshold: 45
+  inlineoptsize-threshold: 15
 
-OpenMP Construct at hello.c(12,2)
-remark #16201: OpenMP DEFINED REGION WAS PARALLELIZED
+DEAD STATIC FUNC: llvm.directive.region.entry
+
+DEAD STATIC FUNC: llvm.directive.region.exit
+
+COMPILE FUNC: main
+   -> BROKER: __kmpc_fork_call hello.c (14,2)(main.extracted)
+
+COMPILE FUNC: main.extracted
+   -> DELETE: llvm.directive.region.entry hello.c (14,2)
+   -> DELETE: llvm.directive.region.exit hello.c (14,2)
+
+---- End Inlining Report ------
 ```
 
 * Para controlar el número de hilos de ejecución se puede hacer de varias formas:
@@ -107,7 +124,7 @@ Hello World from thread 2 of 3 threads
 * Iteraciones del bucle **i** potencialmente paralelas
     * Iteraciones independientes
 * A tener en cuenta
-    * Uso de variables: privadas, compartidas.... ect
+    * Uso de variables: privadas, compartidas.... etc
     * Variable ```++k``` es el índice de la lista de números primos
         * Posible carrera: problema **read\&update\&write**
         * Solución: ```#omp critical```
