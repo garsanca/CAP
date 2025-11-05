@@ -16,11 +16,9 @@
 ![image](figures/omp_exec_model.png)
 
 ### Soporte compilador
-* En [Toolkit oneAPI HPC](https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit.html) están disponibles los compiladores de C/C++ con soporte para OpenMP
-    * Compilador clásico: icc/icpc
-    * Compilador oneAPI DPC++/C++: icx/icpx
-
-* Las pragmas OpenMP indican al compilador las regiones paralelas, y se compilan con la opción de compilador **-qopenmp**
+* El [Toolkit oneAPI HPC](https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit.html) incluye los compiladores icx/icpx (oneAPI DPC++/C++) de C/C++, que incluyen soporte para OpenMP
+     
+* Con las pragmas de OpenMP podemos indicar al compilador las regiones paralelas. Para ello se debe compilar las fuentes con el flag de compilación **-qopenmp**
 
 ### Hello World
 * El [primer ejemplo](HelloWorld/hello.c) versará sobre la compilación y control de hilos de ejecución
