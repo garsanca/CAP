@@ -74,7 +74,7 @@ user@system:~$ nsys nvprof ./simpleNVC
 
 ```bash
 user@system:~$ icpx -fiopenmp -fopenmp-targets=spir64 simple.cpp -o simple
-user@system:~$  ./simple 
+user@system:~$  LIBOMPTARGET_PLUGIN=OPENCL ./simple 
 Running on GPU
 0
 2
