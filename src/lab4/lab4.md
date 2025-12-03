@@ -5,9 +5,9 @@
 
 # Recursos
 ## Recursos disponibles
-* Recordad la información de la asignatura disponible en el Campus Virtual. [Modulo 6: Computación heterogénea](https://cvmdp.ucm.es/moodle/course/view.php?id=40889#section-7)
+* Recordad la información de la asignatura disponible en el Campus Virtual. Modulo 6: Computación heterogénea
 
-* Cuadernos de Jupyter disponibles para ser ejecutados en el [Intel-DevCloud](https://devcloud.intel.com/oneapi/get_started/)
+* Cuadernos de Jupyter disponibles para ser ejecutados en el local
     * Introducción a [OpenMP Offload](https://github.com/oneapi-src/oneAPI-samples/blob/master/DirectProgramming/C%2B%2B/Jupyter/OpenMP-offload-training/intro)
     * Gestión y [manejo de datos](https://github.com/oneapi-src/oneAPI-samples/blob/master/DirectProgramming/C%2B%2B/Jupyter/OpenMP-offload-training/datatransfer) con OpenMP-target
     * Expresión y [explotación de los niveles de paralelismo en GPU](https://github.com/oneapi-src/oneAPI-samples/blob/master/DirectProgramming/C%2B%2B/Jupyter/OpenMP-offload-training/parallelism)
@@ -33,6 +33,7 @@ user@system:~$ ifx -fiopenmp -fopenmp-targets=spir64 source.f90
     * Activación de OpenMP con el flag ```-mp=gpu``` que a su vez tiene soporte **offloading**
 
 ```bash
+user@system:~$ export PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/2025/compilers/bin/:${PATH}
 user@system:~$ nvc++ -o simpleNVC simple.cpp  -mp=gpu
 user@system:~$ nsys nvprof ./simpleNVC 
 ....
