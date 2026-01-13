@@ -1,5 +1,5 @@
 CXX=icpx
-CXXFLAGS=-Wall -Wextra -std=c99 -O2 -xhost -qopt-report -fopenmp
+CXXFLAGS=-Wall -Wextra -std=c++17 -O2 -xhost -qopt-report -qopenmp
 
 LDFLAGS=-lm
 
