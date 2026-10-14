@@ -42,7 +42,7 @@ user@host:~/ $ sycl-ls
 [ext_oneapi_cuda:gpu:0] NVIDIA CUDA BACKEND, Quadro P400 0.0 [CUDA 12.2]
 ```
 
-No obstante, está disponible para los alumnos una [máquina virtual en formato Oracle Virtual Box](https://www.virtualbox.org) alojada en la [nube](https://drive.google.com/file/d/1DqOZTJ96cF7vPfhMC5Il0f-PGn9NcEGZ/view?usp=drive_link) para que los alumnos puedan hacer los desarrollos fuera de los laboratorios de la FDI.
+No obstante, está disponible para los alumnos una [máquina virtual en formato Oracle Virtual Box](https://www.virtualbox.org) alojada en la [nube](https://drive.google.com/file/d/1DqOZTJ96cF7vPfhMC5Il0f-PGn9NcEGZ/view?usp=drive_link) para que los alumnos puedan hacer los desarrollos fuera de los laboratorios de la FDI con el usuario *cap* y la contraseña de acceso a la sesión *none* que también dispone de permisos de sudo.
 
 ## Práctica 1 (Explotación paralelismo vectorial)
 * Pequeños vectores = SIMD  (Single Instruction Multiple Data)
