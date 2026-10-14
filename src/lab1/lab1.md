@@ -100,7 +100,7 @@ void axpy(float *c, float *a, float *b, float cte, int n)
 # Ejemplos
 ## Opciones de compilación 
 * Especifica las [optimizaciones en compilación](https://software.intel.com/en-us/cpp-compiler-developer-guide-and-reference-o): -O[n]
-    * Por defecto el compilador[^1] utiliza **-O2**
+    * Por defecto el [compilador](https://www.intel.com/content/www/us/en/docs/dpcpp-cpp-compiler/developer-guide-reference/2024-2/o-001.html) utiliza **-O2**
 * El código de ejemplo está [disponible](CompilerOpt/foo.c)
 
 |   |   |
@@ -115,7 +115,7 @@ void axpy(float *c, float *a, float *b, float cte, int n)
 | **O3** | O2+ Opt. más agresiva: fusión de bucles, unroll                                       |
 |        | Adecuada para código basados en bucles y cómputo fp                                   |
 
-[^1]: \url{https://www.intel.com/content/www/us/en/docs/dpcpp-cpp-compiler/developer-guide-reference/2024-2/o-001.html}
+[^1]: \url{}
 
 ## Opciones de compilación
 * El código de ejemplo está [disponible](CompilerOpt/foo.c)
