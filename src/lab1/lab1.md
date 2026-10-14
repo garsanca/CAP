@@ -217,3 +217,39 @@ LOOP END
 
 
 
+# Intel-Advisor
+[**Intel Advisor**](https://www.intel.com/content/www/us/en/developer/tools/oneapi/advisor.html) es una herramienta de análisis de rendimiento e ingeniería software diseñada para ayudar a desarrolladores a optimizar el rendimiento de sus aplicaciones en arquitecturas Intel (CPUs, GPUs y FPGAs). Forma parte del conjunto de herramientas **Intel oneAPI Rendering Toolkit / Base Kit**.
+
+## Funciones Principales
+* **Análisis Roofline (Roofline Analysis):**
+    * Visualiza los límites teóricos del hardware frente al rendimiento real de la aplicación.
+    * Identifica si el cuello de botella de la aplicación está limitado por la memoria (*Memory-bound*) o por la capacidad de cálculo (*Compute-bound*).
+
+* **Vectorización (Vectorization Advisor):**
+    * Identifica bucles y regiones de código que se benefician del uso de instrucciones SIMD (AVX-512, AVX2, etc.).
+    * Muestra por qué ciertos bucles no se vectorizan y sugiere cambios específicos en el código para habilitar la vectorización.
+
+* **Descarga a GPU (Offload Advisor):**
+    * Analiza el código ejecutado en CPU e identifica qué partes del programa obtendrían ganancias significativas al trasladarse a aceleradores o GPUs.
+    * Modela los costes de transferencia de datos y estimaciones de aceleración (*speedup*) antes de realizar el escalado a hardware dedicado.
+
+* **Análisis de Flujo de Datos y Dependencias:**
+    * Realiza análisis de dependencias entre datos (*Data Dependency Analysis*) para detectar de manera segura posibles condiciones de carrera en bucles paralelos.
+    * Muestra la huella de memoria (*Memory Access Patterns - MAP*) para comprender patrones de acceso contiguos o no contiguos.
+
+## Instalación
+* Se puede descargar una versión "stand-alone" del [repositorio de Intel](https://www.intel.com/content/www/us/en/developer/tools/oneapi/advisor-download.html)
+* Seleccionando el sitema Operativo **Linux** y el instalador "Offline Instaler" 
+* Se pincha el enlace "Continue as a Guest (download starts immediately)" que habilita la descarga
+* Una vez disponemos el fichero "intel-advisor-XXXX_offline.sh", ejecutar en una consola el instalador: `sh ./intel-advisor-XXXX_offline.sh`
+    1. Tras seguir lo pasos previos, se llega a la pantalla de instalación "Welcome" donde **hay que aceptar los terminos de la licencia** y pulsar "**Recomended Installation**"
+    2. No se desea la integración en el IDE de Eclipse "Skip Eclipse IDE configuration"
+    3. Seleccionar la opción "I do NOT consent to the collection of my information"
+    4. Se procederá a la instalación en la ruta por defecto `$HOME/intel/oneapi`
+
+## Utilización
+* Antes de poder usar la herramienta, conviente cargar la variables de entorno ejecutando el script "setvars.sh": `source $HOME/intel/oneapi/setvars.sh`
+* En la consola se puede ejecutar la herramienta con `advisor-gui`
+    * Creación de un proyecto con su nombre
+    * Selección del ejecutable del proyecto 
+    * Selección de análisis a realizar: **Vectorization and Code Insights** o **CPU/Memory Roofline Insights**
