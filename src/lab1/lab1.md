@@ -242,6 +242,10 @@ LOOP END
 * Seleccionando el sitema Operativo **Linux** y el instalador "Offline Instaler" 
 * Se pincha el enlace "Continue as a Guest (download starts immediately)" que habilita la descarga
 * Una vez disponemos el fichero "intel-advisor-XXXX_offline.sh", ejecutar en una consola el instalador: `sh ./intel-advisor-XXXX_offline.sh`
+
+![imagen](figures/advisor-install.png)
+
+
     1. Tras seguir lo pasos previos, se llega a la pantalla de instalación "Welcome" donde **hay que aceptar los terminos de la licencia** y pulsar "**Recomended Installation**"
     2. No se desea la integración en el IDE de Eclipse "Skip Eclipse IDE configuration"
     3. Seleccionar la opción "I do NOT consent to the collection of my information"
@@ -253,3 +257,5 @@ LOOP END
     * Creación de un proyecto con su nombre
     * Selección del ejecutable del proyecto 
     * Selección de análisis a realizar: **Vectorization and Code Insights** o **CPU/Memory Roofline Insights**
+
+![imagen](figures/advisor-report.png)
